@@ -79,6 +79,9 @@ def registrar_status(mensagem):
         LOGS.appendleft(f"{time.strftime('%H:%M:%S')} - {mensagem}")
     logging.info(mensagem)
 
+def registrar_evento_botao(mensagem):
+    """Chamada pelos botões físicos (botoes_manual.py) para o evento aparecer nos logs do site."""
+    registrar_status(f"[Botão físico] {mensagem}")
 
 def configurar_leitor_rfid(leitor):
     """Recebe o leitor RFID ja aberto pela main.py (a porta serial so pode ter um dono)."""
