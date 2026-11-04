@@ -74,17 +74,12 @@ def botao():
     estado2 = BOTAO_SOLTO
     estado3 = BOTAO_SOLTO
     estado4 = BOTAO_SOLTO
-    buffer_travado1 = []
-    buffer_travado2 = [] #deixar bonito depois
     while not parar.is_set():
 
         estado1 = btm.monitorar_botao_motor(1, estado1)
         estado2 = btm.monitorar_botao_motor(2, estado2)
         estado3 = btm.calibrar(1, estado3)
         estado4 = btm.calibrar(2, estado4)
-
-
-        mt.destravar(1, buffer_travado1)
 
 
 def rodar_site():

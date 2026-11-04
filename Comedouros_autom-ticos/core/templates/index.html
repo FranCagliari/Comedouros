@@ -137,6 +137,7 @@
                     <button class="btn btn-parar" id="btnFinalizarCadastro" onclick="finalizarCadastro(this)">Finalizar cadastro</button>
                     <button class="btn btn-parar" id="btnCancelarCadastro" onclick="cancelarCadastro(this)">Cancelar cadastro</button>
                 </div>
+                <button class="btn btn-contorno btn-lista-ovelhas" onclick="abrirListaOvelhas(this)">Ver ovelhas cadastradas</button>
             </section>
 
             <section class="card card-larga">
@@ -156,12 +157,39 @@
 
         <section class="card zona-perigo">
             <div>
-                <h2>Reiniciar Raspberry Pi</h2>
-                <p class="dica">O cocho e este site ficam fora do ar até a Raspberry voltar.</p>
+                <h2>Reiniciar ou desligar Raspberry Pi</h2>
+                <p class="dica">O cocho e este site ficam fora do ar até a Raspberry voltar. Depois de desligar, ela só volta tirando e recolocando a fonte.</p>
             </div>
-            <button class="btn btn-perigo" onclick="reiniciar(this)">Reiniciar</button>
+            <div class="botoes">
+                <button class="btn btn-perigo" onclick="reiniciar(this)">Reiniciar</button>
+                <button class="btn btn-parar" onclick="desligar(this)">Desligar</button>
+            </div>
         </section>
     </main>
+
+    <dialog id="dialogOvelhas" class="dialogo" aria-labelledby="tituloOvelhas">
+        <div class="dialogo-cabecalho">
+            <div>
+                <h2 id="tituloOvelhas">Ovelhas cadastradas</h2>
+                <p class="dica" id="resumoOvelhas">Carregando…</p>
+            </div>
+            <button class="btn-fechar" type="button" onclick="fecharListaOvelhas()" aria-label="Fechar">&times;</button>
+        </div>
+        <input id="filtroOvelhas" type="search" placeholder="Buscar por nome ou tag" autocomplete="off" oninput="filtrarOvelhas()">
+        <div class="tabela-rolagem">
+            <table class="tabela-ovelhas">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th class="coluna-tag">Tag</th>
+                        <th class="numero">Peso</th>
+                        <th class="numero">Ração</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoOvelhas"></tbody>
+            </table>
+        </div>
+    </dialog>
 
     <div id="avisos" class="avisos" aria-live="polite"></div>
 

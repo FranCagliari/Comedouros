@@ -1,6 +1,7 @@
 import csv
 import logging
 import os
+import re
 import subprocess
 import threading
 import time
@@ -358,6 +359,62 @@ def ler_dados_ovelha(tag):
     return None
 
 
+def numero_ou_none(texto):
+    try:
+        return float(str(texto).strip().replace(",", "."))
+    except (TypeError, ValueError):
+        return None
+
+
+def listar_ovelhas():
+    """Todas as tags do tag_info.csv, com a racao calculada como na maquina_estados.calcular_racao.
+    Peso vazio, -1 (medicao descartada) ou -2 (animal bloqueado) vira None: sem peso valido."""
+    ovelhas = []
+    with caminho_tag_info().open("r", encoding="utf-8", newline="") as arquivo:
+        for registro in csv.DictReader(arquivo):
+            tag = str(registro.get("tag_id") or "").strip().upper()
+            if not tag:
+                continue
+            tipo = "percentual" if str(registro.get("tipo") or "").strip().lower() == "percentual" else "fixo"
+            valor = numero_ou_none(registro.get("valor"))
+            peso = numero_ou_none(registro.get("peso"))
+            if peso is not None and peso <= 0:
+                peso = None
+            if valor is None or valor <= 0:
+                racao_kg = None
+            elif tipo == "percentual":
+                racao_kg = round(peso * valor / 100, 3) if peso else None
+            else:
+                racao_kg = valor
+            ovelhas.append({
+                "tag": tag,
+                "nome": str(registro.get("nome") or "").strip(),
+                "peso": peso,
+                "tipo": tipo,
+                "valor": valor,
+                "racao_kg": racao_kg,
+                "mestra": str(registro.get("mestra") or "").strip().lower() == "true",
+            })
+    return ovelhas
+
+
+@app.get("/api/ovelhas")
+def api_ovelhas():
+    """Lista das ovelhas cadastradas (somente leitura do tag_info.csv)."""
+    try:
+        ovelhas = listar_ovelhas()
+    except FileNotFoundError:
+        return jsonify(ok=True, ovelhas=[], aviso="O arquivo tag_info.csv ainda não existe.")
+    except Exception as erro:
+        logging.exception("Erro ao ler o tag_info.csv para a lista de ovelhas")
+        return jsonify(ok=False, erro=f"Erro ao ler o tag_info.csv: {erro}"), 500
+    #ordem natural: "2" antes de "10"
+    ovelhas.sort(key=lambda ovelha: [
+        int(parte) if parte.isdigit() else parte.casefold() for parte in re.split(r"(\d+)", ovelha["nome"])
+    ])
+    return jsonify(ok=True, ovelhas=ovelhas)
+
+
 def validar_dados_ovelha(dados):
     """Retorna (nome, peso, tipo, valor) do formulario, ou levanta ValueError com a mensagem para o site."""
     nome = str(dados.get("nome", "")).strip()
@@ -604,6 +661,18 @@ def api_reiniciar():
         registrar_status(f"Erro ao reiniciar a Raspberry Pi: {erro}")
         return jsonify(ok=False, erro=str(erro)), 500
     registrar_status("Reiniciando a Raspberry Pi...")
+    return jsonify(ok=True)
+
+
+@app.post("/api/desligar")
+def api_desligar():
+    """Desliga a Raspberry Pi. Para ligar de novo e preciso tirar e recolocar a fonte."""
+    try:
+        subprocess.Popen(["sudo", "shutdown", "-h", "now"])
+    except Exception as erro:
+        registrar_status(f"Erro ao desligar a Raspberry Pi: {erro}")
+        return jsonify(ok=False, erro=str(erro)), 500
+    registrar_status("Desligando a Raspberry Pi...")
     return jsonify(ok=True)
 
 

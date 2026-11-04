@@ -214,39 +214,5 @@ def ler_sensor_motor(motor_id):
     return -1
 
 
-def _executar_rotina_destravamento(motor_id, logger=None):
-    direcao_ativa, velocidade_ativa = _obter_estado_ativo(motor_id)
-    nome_motor = f"Motor {motor_id}"
-
-    if logger:
-        logger.warning(
-            f"Travamento detectado no {nome_motor} pelo sensor de corrente. "
-            "Iniciando rotina de destravamento."
-        )
-
-    for _ in range(3):
-        _definir_estado_normal(motor_id, "horario", 255)
-        time.sleep(0.5)
-        _definir_estado_normal(motor_id, "antihorario", 255)
-        time.sleep(0.5)
-
-    with _motor_lock:
-        _definir_estado_normal(motor_id, "parado", 0)
-
-    if logger:
-        logger.warning(
-            f"Rotina de destravamento do {nome_motor} finalizada. "
-            f"Retornando para {direcao_ativa} em velocidade {velocidade_ativa}."
-        )
-
-def destravar (motor_id, buffer):
-    travado = ler_sensor_motor(motor_id)
-    if len(buffer) > 3:
-        buffer.pop(0)
-    buffer.append(travado)
-
-    if all(x == 1 for x in buffer):
-        _executar_rotina_destravamento(motor_id)
-
 if __name__ == "__main__":
     pass

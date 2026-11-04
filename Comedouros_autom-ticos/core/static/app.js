@@ -230,10 +230,134 @@ function mostrarCadastro(cadastro) {
     tagCadastroAnterior = tag;
 }
 
+// ---------- Lista de ovelhas cadastradas (tag_info.csv) ----------
+
+let ovelhasCadastradas = [];
+
+function formatarKg(kg) {
+    return `${kg.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} kg`;
+}
+
+// ovelha: { tag, nome, peso, tipo, valor, racao_kg, mestra } (peso/racao_kg null quando nao ha valor valido)
+function linhaOvelha(ovelha) {
+    const linha = document.createElement('tr');
+
+    const nome = document.createElement('td');
+    nome.className = 'ovelha-nome';
+    nome.textContent = ovelha.nome || 'Sem nome';
+    if (!ovelha.nome) nome.classList.add('vazio');
+    if (ovelha.mestra) {
+        const etiqueta = document.createElement('span');
+        etiqueta.className = 'etiqueta';
+        etiqueta.textContent = 'Mestra';
+        nome.append(' ', etiqueta);
+    }
+    const tagCelular = document.createElement('div');
+    tagCelular.className = 'tag-celular';
+    tagCelular.textContent = ovelha.tag;
+    nome.appendChild(tagCelular);
+
+    const tag = document.createElement('td');
+    tag.className = 'cadastro-tag coluna-tag';
+    tag.textContent = ovelha.tag;
+
+    const peso = document.createElement('td');
+    peso.className = 'numero';
+    if (ovelha.peso == null) {
+        peso.textContent = 'sem peso';
+        peso.classList.add('vazio');
+    } else {
+        peso.textContent = formatarKg(ovelha.peso);
+    }
+
+    const racao = document.createElement('td');
+    racao.className = 'numero';
+    const quantidade = document.createElement('div');
+    const detalhe = document.createElement('div');
+    detalhe.className = 'racao-detalhe';
+    if (ovelha.racao_kg == null) {
+        quantidade.textContent = '—';
+        quantidade.className = 'vazio';
+    } else {
+        quantidade.textContent = formatarKg(ovelha.racao_kg);
+    }
+    if (ovelha.valor == null) {
+        detalhe.textContent = 'quantidade inválida';
+    } else if (ovelha.tipo === 'percentual') {
+        detalhe.textContent = `${ovelha.valor.toLocaleString('pt-BR')}% do peso`
+            + (ovelha.racao_kg == null ? ' · falta o peso' : '');
+    } else {
+        detalhe.textContent = 'quantidade fixa';
+    }
+    racao.append(quantidade, detalhe);
+
+    linha.append(nome, tag, peso, racao);
+    return linha;
+}
+
+function filtrarOvelhas() {
+    const busca = document.getElementById('filtroOvelhas').value.trim().toLowerCase();
+    const corpo = document.getElementById('corpoOvelhas');
+    const visiveis = ovelhasCadastradas.filter((ovelha) =>
+        !busca || ovelha.nome.toLowerCase().includes(busca) || ovelha.tag.toLowerCase().includes(busca));
+    corpo.replaceChildren(...visiveis.map(linhaOvelha));
+    if (!visiveis.length) {
+        const linha = document.createElement('tr');
+        const celula = document.createElement('td');
+        celula.colSpan = 4;
+        celula.className = 'tabela-vazia';
+        celula.textContent = ovelhasCadastradas.length ? 'Nenhuma ovelha encontrada.' : 'Nenhuma ovelha cadastrada.';
+        linha.appendChild(celula);
+        corpo.appendChild(linha);
+    }
+}
+
+async function abrirListaOvelhas(botao) {
+    const dialogo = document.getElementById('dialogOvelhas');
+    const resumo = document.getElementById('resumoOvelhas');
+    botao.disabled = true;
+    let dados;
+    try {
+        const resposta = await fetch('/api/ovelhas');
+        dados = await resposta.json();
+    } catch (erro) {
+        avisar('Sem conexão com o cocho', 'erro', 6000);
+        return;
+    } finally {
+        botao.disabled = false;
+    }
+    if (!dados.ok) {
+        avisar(dados.erro || 'Erro ao carregar as ovelhas', 'erro', 6000);
+        return;
+    }
+    ovelhasCadastradas = dados.ovelhas;
+    const total = ovelhasCadastradas.length;
+    resumo.textContent = dados.aviso
+        || `${total} ${total === 1 ? 'ovelha' : 'ovelhas'} no tag_info.csv. Ração por refeição; no tipo % do peso ela acompanha o último peso medido.`;
+    document.getElementById('filtroOvelhas').value = '';
+    filtrarOvelhas();
+    dialogo.showModal();
+}
+
+function fecharListaOvelhas() {
+    document.getElementById('dialogOvelhas').close();
+}
+
+// fecha clicando fora da janela
+document.getElementById('dialogOvelhas').addEventListener('click', (evento) => {
+    if (evento.target === evento.currentTarget) fecharListaOvelhas();
+});
+
 async function reiniciar(botao) {
     if (!confirm('Reiniciar a Raspberry Pi? O cocho fica parado até ela voltar.')) return;
     const resposta = await post('/api/reiniciar', {}, botao);
     if (resposta.ok) avisar('Reiniciando a Raspberry Pi…', 'ok', 10000);
+}
+
+async function desligar(botao) {
+    if (!confirm('Desligar a Raspberry Pi? O cocho para e só volta tirando e recolocando a fonte da tomada.')) return;
+    const resposta = await post('/api/desligar', {}, botao);
+    if (resposta.ok) avisar('Desligando a Raspberry Pi… Aguarde o LED verde parar de piscar antes de tirar a fonte.', 'ok', 15000);
 }
 
 // ---------- Atualizacao da tela ----------

@@ -441,6 +441,155 @@ h1 {
     opacity: 0.55;
 }
 
+/* ---------- Lista de ovelhas cadastradas ---------- */
+
+.btn.btn-contorno {
+    background: transparent;
+    color: var(--primaria);
+    box-shadow: inset 0 0 0 1.5px var(--primaria);
+}
+
+.btn.btn-contorno:hover {
+    background: var(--primaria-suave);
+}
+
+.btn-lista-ovelhas {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.dialogo {
+    width: min(760px, calc(100% - 32px));
+    max-height: calc(100vh - 48px);
+    padding: 18px 20px;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    background: var(--superficie);
+    color: var(--texto);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.dialogo[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialogo::backdrop {
+    background: rgba(10, 20, 15, 0.45);
+}
+
+.dialogo-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.dialogo-cabecalho h2 {
+    margin-bottom: 4px;
+}
+
+.dialogo-cabecalho .dica {
+    margin: 0;
+}
+
+.btn-fechar {
+    font: inherit;
+    font-size: 1.6rem;
+    line-height: 1;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 10px;
+    background: var(--fundo);
+    color: var(--texto-suave);
+    cursor: pointer;
+}
+
+.btn-fechar:hover {
+    color: var(--texto);
+}
+
+.tabela-rolagem {
+    overflow: auto;
+    min-height: 0;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+}
+
+.tabela-ovelhas {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.tabela-ovelhas th,
+.tabela-ovelhas td {
+    padding: 9px 12px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--borda);
+}
+
+.tabela-ovelhas th {
+    position: sticky;
+    top: 0;
+    background: var(--fundo);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texto-suave);
+}
+
+.tabela-ovelhas tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tabela-ovelhas .numero {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.ovelha-nome {
+    font-weight: 600;
+}
+
+.ovelha-nome .etiqueta {
+    font-size: 0.65rem;
+    vertical-align: middle;
+}
+
+.tabela-ovelhas .cadastro-tag {
+    color: var(--texto-suave);
+    min-width: 140px;
+}
+
+.tag-celular {
+    display: none;
+}
+
+.racao-detalhe {
+    font-size: 0.78rem;
+    white-space: normal;
+    color: var(--texto-suave);
+}
+
+.tabela-ovelhas .vazio {
+    color: var(--texto-suave);
+    font-weight: 400;
+    font-style: italic;
+}
+
+.tabela-vazia {
+    text-align: center !important;
+    color: var(--texto-suave);
+    padding: 24px 12px !important;
+}
+
 input:disabled,
 select:disabled {
     cursor: not-allowed;
@@ -703,8 +852,38 @@ select:focus {
         flex: 1;
     }
 
-    .zona-perigo .btn {
+    .zona-perigo .botoes {
         width: 100%;
+    }
+
+    .zona-perigo .btn {
+        flex: 1;
+    }
+
+    .dialogo {
+        width: calc(100% - 16px);
+        max-height: calc(100vh - 16px);
+        padding: 14px;
+    }
+
+    .tabela-ovelhas th,
+    .tabela-ovelhas td {
+        padding: 8px;
+    }
+
+    /* no celular a tag vai para baixo do nome, para caber peso e racao */
+    .tabela-ovelhas .coluna-tag {
+        display: none;
+    }
+
+    .tag-celular {
+        display: block;
+        margin-top: 2px;
+        font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: var(--texto-suave);
+        word-break: break-all;
     }
 
     .avisos {
