@@ -301,6 +301,32 @@ def api_calibrar_cancelar(numero):
     return jsonify(ok=True)
 
 
+@app.post("/api/tarar/<int:numero>")
+def api_tarar(numero):
+    """Refaz a tara da balanca na hora, sem esperar a tara automatica do loop (a cada 5 min)."""
+    if numero not in BALANCAS:
+        return jsonify(ok=False, erro="Balança inválida."), 400
+    with CALIBRACAO_LOCK:
+        if CALIBRACAO[numero]:
+            return jsonify(ok=False, erro=f"A balança {numero} está sendo calibrada. Termine ou cancele a calibração."), 409
+    with CADASTRO_LOCK:
+        cadastro_aberto = CADASTRO["estado"] != "inativo"
+    #o cadastro tambem trava o USO_COCHO, mas nao mexe na balanca; so o ciclo de alimentacao impede a tara
+    if not cadastro_aberto:
+        if not USO_COCHO.acquire(blocking=False):
+            return jsonify(ok=False, erro="Há um animal no cocho. Aguarde o fim da alimentação para retarar."), 409
+        USO_COCHO.release()
+    try:
+        with HARDWARE_LOCK:
+            tara = float(bl.retarar_balanca(numero))
+    except Exception as erro:
+        registrar_status(f"Erro ao retarar a balança {numero}: {erro}")
+        return jsonify(ok=False, erro=str(erro)), 500
+    bl.salvar_tara(numero, tara)
+    registrar_status(f"Balança {numero} retarada pelo site (tara {tara:.0f}).")
+    return jsonify(ok=True, tara=tara)
+
+
 @app.post("/api/motor/<int:numero>")
 def api_motor(numero):
     if numero not in (1, 2):

@@ -94,6 +94,13 @@
                         <button class="btn btn-parar btn-cancelar-calibracao" id="btnCancelarCalibracao2" onclick="cancelarCalibracao(2, this)">Cancelar calibração</button>
                     </div>
                 </div>
+                <div class="bloco">
+                    <p class="dica">Retarar agora: zera a balança com o que estiver em cima dela. Deixe-a vazia antes de clicar.</p>
+                    <div class="linha">
+                        <button class="btn btn-secundario" onclick="tarar(1, this)">Retarar balança 1</button>
+                        <button class="btn btn-secundario" onclick="tarar(2, this)">Retarar balança 2</button>
+                    </div>
+                </div>
             </section>
 
             <section class="card" id="cardCadastro" data-estado="inativo">
@@ -143,10 +150,13 @@
             <section class="card card-larga">
                 <div class="terminal-cabecalho">
                     <h2>Situação</h2>
-                    <label class="terminal-opcao">
-                        <input type="checkbox" id="terminalSoServico" onchange="filtrarTerminal()">
-                        Só o serviço
-                    </label>
+                    <div class="terminal-acoes">
+                        <label class="terminal-opcao">
+                            <input type="checkbox" id="terminalSoServico" onchange="filtrarTerminal()">
+                            Só o serviço
+                        </label>
+                        <button class="btn btn-pequeno" onclick="limparTerminal()">Limpar console</button>
+                    </div>
                 </div>
                 <p id="situacao" class="situacao">Carregando…</p>
                 <p id="servico" class="dica">Carregando estado do serviço…</p>

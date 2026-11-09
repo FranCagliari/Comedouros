@@ -66,6 +66,16 @@ async function cancelarCalibracao(numero, botao) {
     atualizar();
 }
 
+// Refaz a tara na hora, sem esperar a tara automatica do loop principal
+async function tarar(numero, botao) {
+    const texto = botao.textContent;
+    botao.textContent = 'Retarando…';
+    const resposta = await post(`/api/tarar/${numero}`, {}, botao);
+    botao.textContent = texto;
+    if (resposta.ok) avisar(`Balança ${numero} retarada`);
+    atualizar();
+}
+
 // calibracao: { estado: null | "aguardando_peso" | "lendo", etapa, pesos }
 function mostrarCalibracao(numero, calibracao) {
     const { estado = null, etapa = 0, pesos = [] } = calibracao || {};
@@ -470,6 +480,11 @@ function linhaTerminal({ hora, origem, nivel, texto }) {
     marcaHora.textContent = `${hora} `;
     linha.append(marcaHora, `${origem === 'servico' ? '[serviço] ' : ''}${texto}\n`);
     return linha;
+}
+
+// Limpa so a tela: as proximas linhas continuam chegando a partir de ultimoIdTerminal
+function limparTerminal() {
+    document.getElementById('terminal').textContent = 'Nenhuma saída ainda.';
 }
 
 function filtrarTerminal() {

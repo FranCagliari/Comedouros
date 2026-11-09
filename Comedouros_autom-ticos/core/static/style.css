@@ -728,6 +728,19 @@ select:focus {
     flex-wrap: wrap;
 }
 
+.terminal-acoes {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: auto;
+}
+
+.btn-pequeno {
+    font-size: 0.82rem;
+    padding: 6px 12px;
+    min-height: 0;
+}
+
 .terminal-opcao {
     display: flex;
     align-items: center;
