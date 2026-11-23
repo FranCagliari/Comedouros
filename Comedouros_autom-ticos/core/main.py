@@ -12,6 +12,7 @@ import motor as mt
 import sys
 import notificacoes as nt
 import web_app as web
+import bateria as bat
 
 parar = threading.Event() #sistema para desligar todas as threads
 INTERVALO_LEITURA_PESOS = 0.5
@@ -132,6 +133,7 @@ if __name__ == "__main__":
     t4 = threading.Thread(target=rodar_site, args=(), daemon = True) #site: encerra junto com o programa
 
     t5 = threading.Thread(target=nt.rodar_envio_telegram, args=(parar,), daemon = True) #envia o Telegram sem travar o ciclo do cocho
+    t6 = threading.Thread(target=bat.rodar_leitura_bateria, args=(parar, nt.notificar_bateria_baixa), daemon = True) #ADS1112: tensao da bateria para o site e aviso de bateria baixa
 
 # Iniciando as threads
 
@@ -140,6 +142,7 @@ if __name__ == "__main__":
     t3.start()
     t4.start()
     t5.start()
+    t6.start()
     print(f"Site disponivel em http://<ip-da-raspberry>:{web.PORTA_SITE}")
 
     try:
@@ -154,4 +157,5 @@ if __name__ == "__main__":
     t3.join(timeout=3)
     t4.join(timeout=3)
     t5.join(timeout=3)
+    t6.join(timeout=3)
     desligar()

@@ -366,6 +366,23 @@ def notificar_relatorio_alimentacao(dados_relatorio):
     return enviar_alerta_telegram(mensagem)
 
 
+def notificar_bateria_baixa(percentual, tensao):
+    """
+    Avisa que a bateria da Raspberry chegou no nivel de alerta (chamada uma vez por descarga).
+    """
+    percentual_escaped = _escapar_markdown(f"{percentual:.0f}")
+    tensao_escaped = _escapar_markdown(f"{tensao:.2f}")
+
+    mensagem = (
+        f" *BATERIA BAIXA* \n\n"
+        f"A bateria que alimenta o comedouro está com pouca carga\\.\n\n"
+        f"*Nível:* {percentual_escaped}%\n"
+        f"*Tensão:* {tensao_escaped} V\n\n"
+        f"Recarregue ou troque a bateria para o cocho não desligar\\."
+    )
+
+    return enviar_alerta_telegram(mensagem)
+
 
 async def enviar_log_telegram(caminho_arquivo=LOG_FILE_PATH):
     """

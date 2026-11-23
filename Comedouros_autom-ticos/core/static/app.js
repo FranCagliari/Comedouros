@@ -437,6 +437,77 @@ function mostrarMotor(numero, estado) {
     pilula.textContent = `Girando · ${texto}`;
 }
 
+// bateria: { estado, tensao, tensao_instantanea, percentual, fase, baixa, mensagem, idade }
+// fase: repouso | carregando | estabilizando (fora do repouso a % e o ultimo valor medido em repouso)
+// estado: aguardando | ok | erro | saturado | indisponivel
+function mostrarBateria(bateria) {
+    const bloco = document.getElementById('bateria');
+    const pilula = document.getElementById('bateriaPilula');
+    const pct = document.getElementById('bateriaPct');
+    const tensao = document.getElementById('bateriaTensao');
+    const barra = document.getElementById('bateriaBarra');
+    const nivel = document.getElementById('bateriaNivel');
+    const rodape = document.getElementById('bateriaRodape');
+
+    const estado = bateria ? bateria.estado : 'aguardando';
+    bloco.dataset.estado = estado;
+    pilula.classList.remove('ligado');
+    const carga = estado === 'ok' && bateria.fase && bateria.fase !== 'repouso';
+    bloco.dataset.fase = carga ? bateria.fase : '';
+    if (estado !== 'ok' || (bateria.percentual == null && !carga)) {
+        pct.textContent = '—';
+        tensao.textContent = '';
+        nivel.style.width = '0%';
+        barra.removeAttribute('aria-valuenow');
+        bloco.dataset.nivel = '';
+        const textos = {
+            aguardando: ['Aguardando', 'aguardando leitura'],
+            erro: ['Sem leitura', 'falha na leitura do sensor'],
+            saturado: ['Fora da faixa', 'leitura fora da faixa do sensor'],
+            indisponivel: ['Indisponível', 'leitura da bateria desativada'],
+        };
+        const [rotulo, padrao] = textos[estado] || textos.erro;
+        pilula.textContent = rotulo;
+        rodape.textContent = bateria && bateria.mensagem ? `${padrao}: ${bateria.mensagem}` : padrao;
+        return;
+    }
+
+    tensao.textContent = `${bateria.tensao.toFixed(2)} V`;
+    if (bateria.percentual == null) {
+        // ligou ja carregando: ainda nao ha medicao em repouso
+        pct.textContent = '—';
+        nivel.style.width = '0%';
+        barra.removeAttribute('aria-valuenow');
+        bloco.dataset.nivel = '';
+    } else {
+        const valor = Math.max(0, Math.min(100, bateria.percentual));
+        pct.textContent = `${Math.round(valor)}%`;
+        nivel.style.width = `${valor}%`;
+        barra.setAttribute('aria-valuenow', Math.round(valor));
+        bloco.dataset.nivel = bateria.baixa ? 'baixa' : valor <= 40 ? 'media' : 'boa';
+    }
+    if (carga) {
+        pilula.textContent = bateria.fase === 'carregando' ? 'Carregando' : 'Carga encerrada';
+        pilula.classList.add('ligado');
+        const base = bateria.percentual == null
+            ? 'porcentagem disponível depois da carga'
+            : 'porcentagem da última medição em repouso';
+        rodape.textContent = bateria.fase === 'carregando'
+            ? `painel solar carregando · ${base}`
+            : `aguardando a tensão estabilizar · ${base}`;
+        return;
+    }
+    if (bateria.baixa) {
+        pilula.textContent = 'Bateria baixa';
+    } else {
+        pilula.textContent = 'OK';
+        pilula.classList.add('ligado');
+    }
+    rodape.textContent = bateria.idade > 5
+        ? `última leitura há ${Math.round(bateria.idade)}s`
+        : `atualizado agora · instantânea ${bateria.tensao_instantanea.toFixed(2)} V`;
+}
+
 function mostrarConexao(online) {
     const conexao = document.getElementById('conexao');
     conexao.dataset.estado = online ? 'online' : 'offline';
@@ -459,6 +530,7 @@ async function atualizar() {
     mostrarUltimaTag(status.ultima_tag);
     mostrarMotor(1, status.motor1);
     mostrarMotor(2, status.motor2);
+    mostrarBateria(status.bateria);
     mostrarCadastro(status.cadastro);
     const calibracao = status.calibracao || {};
     mostrarCalibracao(1, calibracao['1']);

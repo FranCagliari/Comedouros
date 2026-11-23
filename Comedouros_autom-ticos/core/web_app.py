@@ -16,6 +16,7 @@ import numpy as np
 import logs_terminal
 logs_terminal.instalar() #antes do logging.basicConfig, para o logging tambem ir para o site
 import balanca as bl
+import bateria
 import leitor_fonkan as rfid
 import motor
 from config import BALANCAS, PESOS_CALIBRACAO_KG, TAG_INFO_CSV
@@ -140,6 +141,7 @@ def status_atual():
         resultado["motor1"] = estado_motor(1)
         resultado["motor2"] = estado_motor(2)
         resultado["logs"] = list(LOGS)
+    resultado["bateria"] = bateria.status_bateria()  #ultimo valor da thread da bateria, sem acessar o I2C
     with CADASTRO_LOCK:
         resultado["cadastro"] = {
             "estado": CADASTRO["estado"],
@@ -207,6 +209,12 @@ def concluir_calibracao(numero, leituras):
 @app.get("/api/status")
 def api_status():
     return jsonify(status_atual())
+
+
+@app.get("/api/bateria")
+def api_bateria():
+    """Tensao (media) e porcentagem da bateria lidas pelo ADS1112."""
+    return jsonify(bateria.status_bateria())
 
 
 @app.get("/api/terminal")
@@ -721,5 +729,7 @@ if __name__ == "__main__":
     configurar_leitor_rfid(rfid.iniciar_leitor())
     logs_terminal.iniciar_leitura_servico()
     threading.Thread(target=ler_balancas_continuamente, daemon=True).start()
+    #so mostra a bateria no site; o aviso no Telegram fica com a main.py
+    threading.Thread(target=bateria.rodar_leitura_bateria, args=(threading.Event(),), daemon=True).start()
 
     app.run(host="0.0.0.0", port=PORTA_SITE)

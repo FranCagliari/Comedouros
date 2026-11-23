@@ -372,6 +372,99 @@ h1 {
     gap: 8px;
 }
 
+/* ---------- Bateria (no card Motores) ---------- */
+
+.bateria {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--borda);
+}
+
+.bateria-leitura {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.bateria-pct {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.bateria-tensao {
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.bateria-barra {
+    grid-column: 1 / -1;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--fundo);
+    border: 1px solid var(--borda);
+    overflow: hidden;
+}
+
+.bateria-nivel {
+    height: 100%;
+    width: 0;
+    background: var(--primaria);
+    transition: width 0.4s ease;
+}
+
+.bateria .dica {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.bateria[data-fase="carregando"] .bateria-nivel {
+    background-image: repeating-linear-gradient(
+        -45deg, rgba(255, 255, 255, 0.28) 0 6px, transparent 6px 12px
+    );
+    background-size: 17px 17px;
+    animation: bateria-carregando 1s linear infinite;
+}
+
+@keyframes bateria-carregando {
+    to { background-position: 17px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bateria[data-fase="carregando"] .bateria-nivel {
+        animation: none;
+    }
+}
+
+.bateria[data-nivel="media"] .bateria-nivel {
+    background: var(--alerta);
+}
+
+.bateria[data-nivel="baixa"] .bateria-nivel {
+    background: var(--perigo);
+}
+
+.bateria[data-nivel="baixa"] .bateria-pct,
+.bateria[data-nivel="baixa"] .pilula {
+    color: var(--perigo);
+}
+
+.bateria[data-nivel="baixa"] .pilula {
+    background: var(--perigo-suave);
+    border-color: transparent;
+}
+
+.bateria[data-estado="erro"] .pilula,
+.bateria[data-estado="saturado"] .pilula {
+    color: var(--alerta);
+    background: var(--alerta-suave);
+    border-color: transparent;
+}
+
 /* ---------- Cadastro ---------- */
 
 .cadastro-status {

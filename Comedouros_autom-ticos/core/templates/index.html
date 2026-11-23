@@ -76,6 +76,20 @@
                         <button class="btn btn-parar" onclick="parar(2, this)">Parar</button>
                     </div>
                 </div>
+                <div class="bateria" id="bateria" data-estado="aguardando">
+                    <div class="motor-info">
+                        <span class="motor-nome">Bateria</span>
+                        <span class="pilula" id="bateriaPilula">—</span>
+                    </div>
+                    <div class="bateria-leitura">
+                        <span class="bateria-pct" id="bateriaPct">—</span>
+                        <span class="bateria-tensao" id="bateriaTensao"></span>
+                    </div>
+                    <div class="bateria-barra" role="progressbar" aria-label="Carga da bateria" aria-valuemin="0" aria-valuemax="100" id="bateriaBarra">
+                        <div class="bateria-nivel" id="bateriaNivel"></div>
+                    </div>
+                    <p class="dica" id="bateriaRodape">aguardando leitura</p>
+                </div>
             </section>
 
             <section class="card">
